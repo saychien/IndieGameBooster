@@ -2,9 +2,17 @@
 
 ## Project Overview
 
-An AI-powered tool that helps indie game developers — who typically lack marketing or publishing backgrounds — find their audience, discover relevant KOLs and communities, and generate personalized outreach content. The goal is to give a solo indie studio the publishing power of a professional label.
+An AI-powered tool that helps indie game developers — who typically lack marketing or publishing backgrounds — analyze their game, discover relevant KOLs and communities across global platforms, and generate platform-native outreach content. The goal is to give a solo indie studio the publishing power of a professional label.
 
 **Core pitch:** "We replace a publisher with an AI agent."
+
+**User flow (revised):**
+1. Developer pastes a Steam URL
+2. App generates a game analysis report (audience profile, keywords, genre tags) — developer can edit it inline before proceeding
+3. App searches across all major platforms (YouTube, Reddit, Bilibili, Xiaohongshu, game media) and surfaces relevant channels/creators with influence metrics
+4. Developer selects the channels they want to target
+5. App generates platform-appropriate marketing content for each selected target
+6. Developer chooses: have us publish directly (hosted), or download all content as files
 
 ---
 
@@ -16,8 +24,9 @@ An AI-powered tool that helps indie game developers — who typically lack marke
 | Styling | Tailwind CSS + shadcn/ui |
 | AI | Claude API (`claude-sonnet-4-20250514`) |
 | Steam data | Steam Store API + SteamSpy API |
-| KOL discovery | YouTube Data API v3 (primary) + Tavily API (fallback/Reddit) |
+| KOL discovery | YouTube Data API v3 + Tavily API (Reddit/Bilibili/Xiaohongshu/game media) |
 | Web scraping | Firecrawl API (for SteamDB historical data) |
+| File export | `jszip` + `file-saver` (client-side ZIP download) |
 | Env | `.env.local` for all API keys |
 
 ---
@@ -26,25 +35,29 @@ An AI-powered tool that helps indie game developers — who typically lack marke
 
 ```
 /app
-  /page.tsx                  # Landing / input page
-  /results/page.tsx          # Results dashboard
+  /page.tsx                      # Landing / input page (Steam URL only)
+  /results/page.tsx              # Results dashboard (multi-step flow)
   /api
-    /steam/route.ts          # Steam + SteamSpy data fetching
-    /analyze/route.ts        # Claude audience analysis
-    /kol/route.ts            # YouTube + Tavily KOL search
-    /outreach/route.ts       # Claude outreach generation
+    /steam/route.ts              # Steam + SteamSpy data fetching
+    /analyze/route.ts            # Claude audience analysis
+    /discovery/route.ts          # Multi-platform KOL & media discovery
+    /outreach/route.ts           # Claude outreach content generation (all formats)
+    /publish/route.ts            # Hosted publish stub (future integration)
 /components
-  /GameInput.tsx             # Steam URL or text description input
-  /AudienceCard.tsx          # Audience profile display
-  /KOLList.tsx               # KOL results with select interaction
-  /OutreachPanel.tsx         # Generated email/post with copy button
-  /ImprovementTips.tsx       # 3 steam page improvement suggestions
+  /GameInput.tsx                 # Steam URL input
+  /AnalysisEditor.tsx            # Editable audience profile + keyword cards
+  /ImprovementTips.tsx           # 3 Steam page improvement suggestions
+  /ChannelDiscovery.tsx          # Multi-platform channel/creator results with filters
+  /ChannelCard.tsx               # Individual channel card with influence badge + select
+  /OutreachWorkspace.tsx         # Generated content per selected channel, with tabs
+  /PublishPanel.tsx              # "Publish" vs "Download" choice + status
 /lib
-  /steam.ts                  # Steam API + SteamSpy helpers
-  /claude.ts                 # Claude API call wrappers
-  /youtube.ts                # YouTube Data API helpers
-  /tavily.ts                 # Tavily search helpers
-  /mockData.ts               # Pre-loaded demo data for 2 test games
+  /steam.ts                      # Steam API + SteamSpy helpers
+  /claude.ts                     # Claude API call wrappers
+  /youtube.ts                    # YouTube Data API helpers
+  /tavily.ts                     # Tavily search (Reddit / Bilibili / Xiaohongshu / media)
+  /mockData.ts                   # Pre-loaded demo data for 2 test games
+  /export.ts                     # ZIP export helper (jszip + file-saver)
 ```
 
 ---
