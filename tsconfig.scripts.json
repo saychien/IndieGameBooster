@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2017",
+    "lib": ["es2017"],
+    "outDir": "./dist-scripts",
+    "esModuleInterop": true,
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["scripts/**/*.ts", "lib/**/*.ts"]
+}

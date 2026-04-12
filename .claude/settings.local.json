@@ -3,7 +3,13 @@
     "allow": [
       "Bash(npm install:*)",
       "Bash(npx tailwindcss:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(node:*)",
+      "Bash(curl:*)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(npm run:*)",
+      "Bash(python3 -m json.tool)"
     ]
   }
 }

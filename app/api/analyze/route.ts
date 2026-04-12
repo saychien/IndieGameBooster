@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { callClaude } from '@/lib/claude'
+import { callClaude, parseJson } from '@/lib/claude'
 import { GameData, AnalysisReport, ImprovementTip } from '@/lib/types'
 
 export async function POST(req: NextRequest) {
@@ -46,8 +46,8 @@ Market context: estimated ${game.estimatedOwners || 'unknown'} owners, priced at
       callClaude(tipsPrompt, 400),
     ])
 
-    const analysis: AnalysisReport = JSON.parse(analysisRaw)
-    const tips: ImprovementTip[] = JSON.parse(tipsRaw)
+    const analysis = parseJson<AnalysisReport>(analysisRaw)
+    const tips = parseJson<ImprovementTip[]>(tipsRaw)
 
     return NextResponse.json({ analysis, tips })
   } catch (e) {

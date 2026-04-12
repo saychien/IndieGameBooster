@@ -1,63 +1,49 @@
 'use client'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState, Suspense } from 'react'
-import { GameData, AnalysisReport, ImprovementTip, Channel, OutreachContent } from '@/lib/types'
+import { GameData, AnalysisReport, Channel, ChannelPlatform, OutreachContent, SelectablePlatform } from '@/lib/types'
+import type { KOL } from '@/app/api/discovery/route'
 import { MOCK_GAMES } from '@/lib/mockData'
 import AnalysisEditor from '@/components/AnalysisEditor'
+import SteamTipsPanel from '@/components/SteamTipsPanel'
+import PlatformSelector from '@/components/PlatformSelector'
 import ChannelDiscovery from '@/components/ChannelDiscovery'
 import OutreachWorkspace from '@/components/OutreachWorkspace'
 import PublishPanel from '@/components/PublishPanel'
 
-const S = {
-  page: { minHeight: '100vh', background: '#0a0a0f', paddingBottom: '6rem' },
-  nav: {
-    borderBottom: '1px solid #1e1e2e',
-    padding: '1rem 2rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    background: 'rgba(10,10,15,0.9)',
-    backdropFilter: 'blur(8px)',
-    position: 'sticky' as const,
-    top: 0,
-    zIndex: 10,
-  },
-  logo: { color: '#6366f1', fontWeight: 800, fontSize: '0.95rem', letterSpacing: '0.1em', textTransform: 'uppercase' as const, cursor: 'pointer' },
-  container: { maxWidth: '960px', margin: '0 auto', padding: '0 2rem' },
-  gameCard: {
-    display: 'flex',
-    gap: '1.5rem',
-    background: '#12121a',
-    border: '1px solid #1e1e2e',
-    borderRadius: '16px',
-    padding: '1.5rem',
-    marginTop: '2.5rem',
-    marginBottom: '2.5rem',
-  },
-  gameImg: { width: '200px', height: '94px', objectFit: 'cover' as const, borderRadius: '8px', flexShrink: 0 },
-  gameImgPlaceholder: { width: '200px', height: '94px', background: '#1e1e2e', borderRadius: '8px', flexShrink: 0 },
-  gameName: { fontSize: '1.4rem', fontWeight: 800, color: '#e2e8f0', marginBottom: '0.4rem' },
-  gameMeta: { color: '#64748b', fontSize: '0.85rem', marginBottom: '0.75rem' },
-  tagRow: { display: 'flex', flexWrap: 'wrap' as const, gap: '0.4rem' },
-  tag: { background: '#1e1e2e', color: '#94a3b8', borderRadius: '6px', padding: '0.2rem 0.55rem', fontSize: '0.75rem' },
-  section: { marginBottom: '3.5rem' },
-  sectionHeader: { display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' },
-  stepNum: {
-    width: '28px', height: '28px', borderRadius: '50%', background: '#6366f1',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    color: '#fff', fontWeight: 800, fontSize: '0.8rem', flexShrink: 0,
-  },
-  sectionTitle: { fontSize: '1.15rem', fontWeight: 700, color: '#e2e8f0' },
-  skeleton: { background: 'linear-gradient(90deg, #12121a 25%, #1e1e2e 50%, #12121a 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite', borderRadius: '10px' },
-  errorBox: { background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '1rem 1.25rem', color: '#ef4444', fontSize: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  retryBtn: { padding: '0.35rem 0.85rem', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '6px', color: '#ef4444', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600 },
+const C = {
+  pine700: '#2D6A4F', pine500: '#40916C', pine100: '#D8EFE4', pine200: '#B2DACC',
+  bgPage: '#F7FBF9', bgSurface: '#FFFFFF', bgSubtle: '#EEF6F1',
+  border: '#C8DFD4',
+  textPrimary: '#1A2E25', textSecondary: '#3D6B52', textMuted: '#7A9E8A',
+  red: '#DC2626',
 }
 
-function Skeleton({ h = 120 }: { h?: number }) {
-  return <div style={{ ...S.skeleton, height: `${h}px`, marginBottom: '1rem' }} />
+type Stage = 'steam' | 'analysis' | 'ready' | 'crawling' | 'discovery' | 'outreach' | 'publish'
+
+function Skeleton({ h = 80 }: { h?: number }) {
+  return <div className="skeleton" style={{ height: h, marginBottom: '0.75rem' }} />
 }
 
-type Stage = 'steam' | 'analysis' | 'edit' | 'discovery' | 'outreach' | 'publish'
+function SectionHeader({ step, title }: { step: number; title: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', paddingBottom: '0.875rem', borderBottom: `1px solid ${C.pine200}` }}>
+      <div style={{ width: 28, height: 28, borderRadius: '50%', background: C.pine700, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: '0.78rem', flexShrink: 0 }}>
+        {step}
+      </div>
+      <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: C.pine700 }}>{title}</h2>
+    </div>
+  )
+}
+
+function ErrorRow({ msg, onRetry }: { msg: string; onRetry?: () => void }) {
+  return (
+    <div style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 10, padding: '0.875rem 1.1rem', color: C.red, fontSize: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <span>{msg}</span>
+      {onRetry && <button onClick={onRetry} style={{ color: C.red, background: 'none', border: '1px solid rgba(220,38,38,0.3)', borderRadius: 6, padding: '0.3rem 0.75rem', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700 }}>Retry</button>}
+    </div>
+  )
+}
 
 function ResultsContent() {
   const searchParams = useSearchParams()
@@ -68,20 +54,18 @@ function ResultsContent() {
   const [stage, setStage] = useState<Stage>('steam')
   const [game, setGame] = useState<GameData | null>(null)
   const [analysis, setAnalysis] = useState<AnalysisReport | null>(null)
-  const [tips, setTips] = useState<ImprovementTip[]>([])
   const [channels, setChannels] = useState<Channel[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [outreach, setOutreach] = useState<OutreachContent[]>([])
-  const [errors, setErrors] = useState<Partial<Record<Stage, string>>>({})
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({})
 
   useEffect(() => {
     if (demoKey && MOCK_GAMES[demoKey]) {
       const mock = MOCK_GAMES[demoKey]
       setGame(mock.game)
       setAnalysis(mock.analysis)
-      setTips(mock.tips)
       setChannels(mock.channels)
-      setStage('edit')
+      setStage('ready')
       return
     }
     if (steamUrl) fetchSteam()
@@ -102,7 +86,7 @@ function ResultsContent() {
       setGame(data)
       fetchAnalysis(data)
     } catch (e) {
-      setErrors(prev => ({ ...prev, steam: (e as Error).message }))
+      setErrors(p => ({ ...p, steam: (e as Error).message }))
     }
   }
 
@@ -117,36 +101,61 @@ function ResultsContent() {
       const data = await res.json()
       if (data.error) throw new Error(data.error)
       setAnalysis(data.analysis)
-      setTips(data.tips || [])
-      setStage('edit')
+      setStage('ready')
     } catch (e) {
-      setErrors(prev => ({ ...prev, analysis: (e as Error).message }))
+      setErrors(p => ({ ...p, analysis: (e as Error).message }))
     }
   }
 
-  async function handleAnalysisConfirm(confirmed: AnalysisReport) {
-    setAnalysis(confirmed)
-    setStage('discovery')
-    fetchDiscovery(confirmed)
-  }
-
-  async function fetchDiscovery(confirmed: AnalysisReport) {
+  async function handleStartDiscovery(platforms: SelectablePlatform[]) {
+    if (!analysis || !game) return
+    setStage('crawling')
+    setErrors({})
     try {
       const res = await fetch('/api/discovery', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ analysis: confirmed, gameName: game?.name }),
+        body: JSON.stringify({ audienceProfile: analysis.audienceProfile, platforms, gameData: game }),
       })
-      const data = await res.json()
-      if (data.error) throw new Error(data.error)
-      setChannels(data.channels || [])
-    } catch (e) {
-      setErrors(prev => ({ ...prev, discovery: (e as Error).message }))
-    }
-  }
+      const data: Record<string, KOL[]> = await res.json()
 
-  function toggleChannel(id: string) {
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+      // Map per-platform KOL arrays → flat Channel[]
+      const flat: Channel[] = []
+      const platformChannelMap: Record<string, ChannelPlatform> = {
+        youtube: 'youtube_creator',
+        reddit: 'reddit',
+        bilibili: 'bilibili',
+        xiaohongshu: 'xiaohongshu',
+        gaming_media: 'gaming_media',
+      }
+      for (const [platform, kols] of Object.entries(data)) {
+        for (const kol of kols) {
+          flat.push({
+            id: kol.channelId,
+            platform: (platformChannelMap[platform] ?? 'youtube_creator') as ChannelPlatform,
+            name: kol.channelName,
+            url: kol.channelUrl,
+            followerCount: kol.subscriberCount,
+            followerLabel: platform === 'reddit' ? 'members' : 'subscribers',
+            recentContent: kol.recentTitles,
+            relevanceReason: kol.relevanceReason,
+            influenceWeight: kol.relevanceScore,
+          })
+        }
+      }
+
+      // Show "no data" message per platform if empty
+      const emptyPlatforms = platforms.filter(p => !data[p] || data[p].length === 0)
+      if (emptyPlatforms.length > 0 && flat.length === 0) {
+        setErrors(p => ({ ...p, discovery: `No data in database yet for: ${emptyPlatforms.join(', ')}. Run the crawl script first.` }))
+      }
+
+      setChannels(flat)
+      setStage('discovery')
+    } catch (e) {
+      setErrors(p => ({ ...p, discovery: (e as Error).message }))
+      setStage('ready')
+    }
   }
 
   async function generateOutreach() {
@@ -165,121 +174,109 @@ function ResultsContent() {
       setOutreach(data.outreach || [])
       setStage('publish')
     } catch (e) {
-      setErrors(prev => ({ ...prev, outreach: (e as Error).message }))
+      setErrors(p => ({ ...p, outreach: (e as Error).message }))
       setStage('discovery')
     }
   }
 
   const selectedChannels = channels.filter(c => selectedIds.includes(c.id))
+  const showDiscovery = stage === 'discovery' || stage === 'outreach' || stage === 'publish'
+  const showOutreach = stage === 'publish' && outreach.length > 0
+  const showPlatformSelector = (stage === 'ready' || stage === 'crawling') && analysis !== null
+  const showAnalysis = stage !== 'steam' && stage !== 'analysis' && analysis !== null
 
   return (
-    <div style={S.page}>
-      <nav style={S.nav}>
-        <div style={S.logo} onClick={() => router.push('/')}>Indie Game Booster</div>
-        {game && <div style={{ color: '#64748b', fontSize: '0.85rem' }}>{game.name}</div>}
+    <div style={{ minHeight: '100vh', background: C.bgPage, paddingBottom: '6rem' }}>
+      {/* Nav */}
+      <nav style={{ borderBottom: `1px solid ${C.border}`, padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.bgSurface, position: 'sticky', top: 0, zIndex: 10, boxShadow: '0 1px 4px rgba(45,106,79,0.06)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => router.push('/')}>
+          <div style={{ width: 30, height: 30, background: C.pine700, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: '0.8rem' }}>IG</div>
+          <span style={{ fontWeight: 800, color: C.pine700, fontSize: '0.9rem', letterSpacing: '0.04em' }}>Indie Game Booster</span>
+        </div>
+        {game && <div style={{ color: C.textMuted, fontSize: '0.85rem' }}>{game.name}</div>}
       </nav>
 
-      <div style={S.container}>
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 1.5rem' }}>
+
         {/* Game card */}
-        {game ? (
-          <div style={S.gameCard}>
+        {stage === 'steam' && <div style={{ marginTop: '2rem' }}><Skeleton h={110} /></div>}
+        {game && (
+          <div style={{ display: 'flex', gap: '1.25rem', background: C.bgSurface, border: `1px solid ${C.border}`, borderRadius: 14, padding: '1.25rem', marginTop: '2rem', marginBottom: '2rem' }}>
             {game.headerImageUrl
-              ? <img src={game.headerImageUrl} alt={game.name} style={S.gameImg} />
-              : <div style={S.gameImgPlaceholder} />
+              ? <img src={game.headerImageUrl} alt={game.name} style={{ width: 200, height: 94, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
+              : <div style={{ width: 200, height: 94, background: C.bgSubtle, borderRadius: 8, flexShrink: 0 }} />
             }
             <div>
-              <div style={S.gameName}>{game.name}</div>
-              <div style={S.gameMeta}>
-                {game.price != null && `$${game.price}`}
-                {game.estimatedOwners && ` · ~${game.estimatedOwners} owners`}
+              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: C.textPrimary, marginBottom: '0.3rem' }}>{game.name}</div>
+              <div style={{ color: C.textMuted, fontSize: '0.83rem', marginBottom: '0.65rem' }}>
+                {game.price != null && `$${game.price}`}{game.estimatedOwners && ` · ~${game.estimatedOwners} owners`}
               </div>
-              <div style={S.tagRow}>
-                {game.tags.slice(0, 8).map((t, i) => <span key={i} style={S.tag}>{t}</span>)}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                {game.tags.slice(0, 8).map((t, i) => (
+                  <span key={i} style={{ background: C.bgSubtle, color: C.textSecondary, borderRadius: 6, padding: '0.18rem 0.5rem', fontSize: '0.73rem', fontWeight: 600, border: `1px solid ${C.border}` }}>{t}</span>
+                ))}
               </div>
             </div>
-          </div>
-        ) : stage === 'steam' ? (
-          <div style={{ marginTop: '2.5rem', marginBottom: '2.5rem' }}>
-            <Skeleton h={110} />
-          </div>
-        ) : null}
-
-        {errors.steam && (
-          <div style={S.errorBox}>
-            <span>Steam error: {errors.steam}</span>
-            <button style={S.retryBtn} onClick={fetchSteam}>Retry</button>
           </div>
         )}
 
-        {/* Section 2 — Analysis */}
-        <div style={S.section}>
-          <div style={S.sectionHeader}>
-            <div style={S.stepNum}>2</div>
-            <div style={S.sectionTitle}>Audience Analysis & Keywords</div>
-          </div>
+        {errors.steam && <ErrorRow msg={`Steam: ${errors.steam}`} onRetry={fetchSteam} />}
 
-          {stage === 'analysis' && <><Skeleton h={90} /><Skeleton h={130} /></>}
-          {errors.analysis && (
-            <div style={S.errorBox}>
-              <span>Analysis error: {errors.analysis}</span>
-              <button style={S.retryBtn} onClick={() => game && fetchAnalysis(game)}>Retry</button>
-            </div>
-          )}
-          {analysis && (stage === 'edit' || stage === 'discovery' || stage === 'outreach' || stage === 'publish') && (
-            <AnalysisEditor
-              analysis={analysis}
-              tips={tips}
-              onConfirm={handleAnalysisConfirm}
-            />
+        {/* Section 2: Analysis */}
+        <div style={{ background: C.bgSurface, border: `1px solid ${C.border}`, borderRadius: 14, padding: '1.5rem', marginBottom: '1.25rem' }}>
+          <SectionHeader step={2} title="Audience Analysis & Keywords" />
+          {stage === 'analysis' && <><Skeleton h={90} /><Skeleton h={120} /></>}
+          {errors.analysis && <ErrorRow msg={`Analysis: ${errors.analysis}`} onRetry={() => game && fetchAnalysis(game)} />}
+          {showAnalysis && (
+            <>
+              <AnalysisEditor analysis={analysis!} onChange={setAnalysis} />
+              {game && <div style={{ marginTop: '1.25rem' }}><SteamTipsPanel game={game} /></div>}
+            </>
           )}
         </div>
 
-        {/* Section 3 — Discovery */}
-        {(stage === 'discovery' || stage === 'outreach' || stage === 'publish') && (
-          <div style={S.section}>
-            <div style={S.sectionHeader}>
-              <div style={S.stepNum}>3</div>
-              <div style={S.sectionTitle}>Channel & Community Discovery</div>
-            </div>
-
-            {channels.length === 0 && !errors.discovery && (
-              <><Skeleton h={120} /><Skeleton h={120} /><Skeleton h={120} /></>
-            )}
-            {errors.discovery && (
-              <div style={S.errorBox}>
-                <span>Discovery error: {errors.discovery}</span>
-              </div>
-            )}
-            {channels.length > 0 && (
-              <ChannelDiscovery
-                channels={channels}
-                selected={selectedIds}
-                onToggle={toggleChannel}
-                onGenerate={generateOutreach}
-                generating={stage === 'outreach'}
-              />
-            )}
+        {/* Section 3: Platform selector */}
+        {showPlatformSelector && (
+          <div style={{ background: C.bgSurface, border: `1px solid ${C.border}`, borderRadius: 14, padding: '1.5rem', marginBottom: '1.25rem' }}>
+            <SectionHeader step={3} title="Select Platforms to Search" />
+            {errors.discovery && <ErrorRow msg={`Discovery: ${errors.discovery}`} />}
+            <PlatformSelector
+              analysis={analysis!}
+              onStart={handleStartDiscovery}
+              loading={stage === 'crawling'}
+            />
           </div>
         )}
 
-        {/* Section 4 — Outreach */}
-        {(stage === 'publish') && outreach.length > 0 && (
-          <div style={S.section}>
-            <div style={S.sectionHeader}>
-              <div style={S.stepNum}>4</div>
-              <div style={S.sectionTitle}>Generated Outreach Content</div>
-            </div>
+        {/* Section 4: Channel discovery */}
+        {showDiscovery && (
+          <div style={{ background: C.bgSurface, border: `1px solid ${C.border}`, borderRadius: 14, padding: '1.5rem', marginBottom: '1.25rem' }}>
+            <SectionHeader step={4} title="Channels & Communities" />
+            {channels.length === 0 && (
+              <><Skeleton h={130} /><Skeleton h={130} /><Skeleton h={130} /></>
+            )}
+            <ChannelDiscovery
+              channels={channels}
+              selected={selectedIds}
+              onToggle={id => setSelectedIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])}
+              onGenerate={generateOutreach}
+              generating={stage === 'outreach'}
+            />
+          </div>
+        )}
+
+        {/* Section 5: Outreach */}
+        {showOutreach && (
+          <div style={{ background: C.bgSurface, border: `1px solid ${C.border}`, borderRadius: 14, padding: '1.5rem', marginBottom: '1.25rem' }}>
+            <SectionHeader step={5} title="Generated Outreach Content" />
             <OutreachWorkspace outreach={outreach} channels={selectedChannels} />
           </div>
         )}
 
-        {/* Section 5 — Publish */}
-        {stage === 'publish' && outreach.length > 0 && game && (
-          <div style={S.section}>
-            <div style={S.sectionHeader}>
-              <div style={S.stepNum}>5</div>
-              <div style={S.sectionTitle}>Publish or Download</div>
-            </div>
+        {/* Section 6: Publish */}
+        {showOutreach && game && (
+          <div style={{ background: C.bgSurface, border: `1px solid ${C.border}`, borderRadius: 14, padding: '1.5rem' }}>
+            <SectionHeader step={6} title="Publish or Download" />
             <PublishPanel outreach={outreach} channels={selectedChannels} game={game} />
           </div>
         )}
@@ -291,7 +288,7 @@ function ResultsContent() {
 export default function ResultsPage() {
   return (
     <Suspense fallback={
-      <div style={{ minHeight: '100vh', background: '#0a0a0f', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+      <div style={{ minHeight: '100vh', background: '#F7FBF9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7A9E8A' }}>
         Loading...
       </div>
     }>

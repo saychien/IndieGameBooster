@@ -45,8 +45,10 @@ export interface Channel {
   recentContent?: string[]       // recent video/post titles
   description?: string
   relevanceReason: string        // Claude-generated, 1 sentence
-  influenceWeight?: number       // future: custom weight parameter, default = followerCount
+  influenceWeight?: number       // Claude relevanceScore 0–100
 }
+
+export type SelectablePlatform = 'youtube' | 'reddit' | 'bilibili' | 'xiaohongshu' | 'gaming_media'
 
 export type OutreachType =
   | 'press_kit'         // game media

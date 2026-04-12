@@ -4,6 +4,16 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const MODEL = 'claude-sonnet-4-20250514'
 
+/** Strip markdown code fences and parse JSON from Claude responses */
+export function parseJson<T>(raw: string): T {
+  const cleaned = raw
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```\s*$/, '')
+    .trim()
+  return JSON.parse(cleaned) as T
+}
+
 export async function callClaude(prompt: string, maxTokens = 800): Promise<string> {
   const msg = await anthropic.messages.create({
     model: MODEL,

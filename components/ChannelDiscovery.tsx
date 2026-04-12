@@ -3,14 +3,26 @@ import { useState } from 'react'
 import { Channel, ChannelPlatform } from '@/lib/types'
 import ChannelCard from './ChannelCard'
 
-const PLATFORMS: { key: ChannelPlatform | 'all'; label: string }[] = [
-  { key: 'all', label: 'All Platforms' },
+const C = {
+  pine700: '#2D6A4F', pine100: '#D8EFE4', pine200: '#B2DACC',
+  bgSubtle: '#EEF6F1', border: '#C8DFD4',
+  textPrimary: '#1A2E25', textSecondary: '#3D6B52', textMuted: '#7A9E8A',
+}
+
+const FILTERS: { key: ChannelPlatform | 'all'; label: string }[] = [
+  { key: 'all',             label: 'All' },
   { key: 'youtube_creator', label: 'YouTube' },
-  { key: 'gaming_media', label: 'Media' },
-  { key: 'reddit', label: 'Reddit' },
-  { key: 'bilibili', label: 'Bilibili' },
-  { key: 'xiaohongshu', label: '小红书' },
+  { key: 'gaming_media',    label: 'Media' },
+  { key: 'reddit',          label: 'Reddit' },
+  { key: 'bilibili',        label: 'Bilibili' },
+  { key: 'xiaohongshu',     label: '小红书' },
 ]
+
+function fmt(n: number) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `${(n / 1_000).toFixed(0)}K`
+  return n > 0 ? n.toString() : '—'
+}
 
 interface Props {
   channels: Channel[]
@@ -20,94 +32,71 @@ interface Props {
   generating: boolean
 }
 
-function formatCount(n: number) {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
-  if (n >= 1_000) return `${(n / 1_000).toFixed(0)}K`
-  return n > 0 ? n.toString() : '—'
-}
-
-const S = {
-  filterRow: { display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' as const },
-  filterBtn: (active: boolean) => ({
-    padding: '0.4rem 0.9rem',
-    borderRadius: '8px',
-    border: `1px solid ${active ? '#6366f1' : '#1e1e2e'}`,
-    background: active ? 'rgba(99,102,241,0.15)' : 'transparent',
-    color: active ? '#a5b4fc' : '#64748b',
-    fontSize: '0.82rem',
-    fontWeight: 600,
-    cursor: 'pointer',
-    transition: 'all 0.15s',
-  }),
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' },
-  footer: { marginTop: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-  reach: { color: '#64748b', fontSize: '0.85rem' },
-  reachNum: { color: '#6366f1', fontWeight: 800, fontSize: '1.4rem' },
-  genBtn: (disabled: boolean) => ({
-    padding: '0.85rem 2rem',
-    background: disabled ? '#1e1e2e' : '#6366f1',
-    color: disabled ? '#64748b' : '#fff',
-    border: 'none',
-    borderRadius: '10px',
-    fontSize: '0.95rem',
-    fontWeight: 700,
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    transition: 'all 0.2s',
-  }),
-}
-
 export default function ChannelDiscovery({ channels, selected, onToggle, onGenerate, generating }: Props) {
-  const [platform, setPlatform] = useState<ChannelPlatform | 'all'>('all')
+  const [filter, setFilter] = useState<ChannelPlatform | 'all'>('all')
 
-  const filtered = platform === 'all' ? channels : channels.filter(c => c.platform === platform)
-  const selectedChannels = channels.filter(c => selected.includes(c.id))
-  const totalReach = selectedChannels.reduce((sum, c) => sum + c.followerCount, 0)
+  const filtered = filter === 'all' ? channels : channels.filter(c => c.platform === filter)
+  const totalReach = channels
+    .filter(c => selected.includes(c.id))
+    .reduce((s, c) => s + c.followerCount, 0)
 
   return (
     <div>
-      <div style={S.filterRow}>
-        {PLATFORMS.map(p => (
-          <button
-            key={p.key}
-            style={S.filterBtn(platform === p.key)}
-            onClick={() => setPlatform(p.key)}
-          >
-            {p.label}
-            {p.key !== 'all' && (
-              <span style={{ marginLeft: '0.35rem', opacity: 0.6 }}>
-                ({channels.filter(c => c.platform === p.key).length})
-              </span>
-            )}
-          </button>
-        ))}
+      {/* Filter pills */}
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+        {FILTERS.map(f => {
+          const count = f.key === 'all' ? channels.length : channels.filter(c => c.platform === f.key).length
+          if (f.key !== 'all' && count === 0) return null
+          const active = filter === f.key
+          return (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              style={{
+                padding: '0.35rem 0.85rem', borderRadius: 8, fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer',
+                background: active ? C.pine100 : 'transparent',
+                color: active ? C.pine700 : C.textMuted,
+                border: `1px solid ${active ? C.pine200 : C.border}`,
+                transition: 'all 0.15s',
+              }}
+            >
+              {f.label} <span style={{ opacity: 0.6, marginLeft: 3 }}>{count}</span>
+            </button>
+          )
+        })}
       </div>
 
+      {/* Grid */}
       {filtered.length === 0 ? (
-        <div style={{ color: '#64748b', textAlign: 'center', padding: '3rem 0' }}>
-          No channels found for this platform yet.
+        <div style={{ color: C.textMuted, textAlign: 'center', padding: '3rem 0', fontSize: '0.875rem' }}>
+          No channels found for this platform.
         </div>
       ) : (
-        <div style={S.grid}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.875rem', marginBottom: '1.75rem' }}>
           {filtered.map(ch => (
-            <ChannelCard
-              key={ch.id}
-              channel={ch}
-              selected={selected.includes(ch.id)}
-              onToggle={() => onToggle(ch.id)}
-            />
+            <ChannelCard key={ch.id} channel={ch} selected={selected.includes(ch.id)} onToggle={() => onToggle(ch.id)} />
           ))}
         </div>
       )}
 
-      <div style={S.footer}>
-        <div style={S.reach}>
-          <div style={S.reachNum}>{formatCount(totalReach)}</div>
-          Estimated total reach · {selected.length} channel{selected.length !== 1 ? 's' : ''} selected
+      {/* Footer */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '1rem', borderTop: `1px solid ${C.border}` }}>
+        <div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: C.pine700, lineHeight: 1 }}>{fmt(totalReach)}</div>
+          <div style={{ color: C.textMuted, fontSize: '0.8rem', marginTop: '0.15rem' }}>
+            estimated reach · {selected.length} selected
+          </div>
         </div>
         <button
-          style={S.genBtn(selected.length === 0 || generating)}
           onClick={onGenerate}
           disabled={selected.length === 0 || generating}
+          style={{
+            padding: '0.8rem 2rem', borderRadius: 10, border: 'none', fontSize: '0.95rem', fontWeight: 700,
+            background: selected.length === 0 || generating ? C.pine100 : C.pine700,
+            color: selected.length === 0 || generating ? C.textMuted : '#fff',
+            cursor: selected.length === 0 || generating ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s',
+          }}
         >
           {generating ? 'Generating...' : `Generate Outreach (${selected.length}) →`}
         </button>

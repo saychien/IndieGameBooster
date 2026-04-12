@@ -95,6 +95,12 @@ Steam链接：${game.steamUrl}
 
 只输出帖子正文，不要标题。`,
       }
+
+    default:
+      return {
+        type: 'creator_email' as OutreachType,
+        prompt: `Write a brief collaboration invitation for ${channel.name} about the game ${game.name}. Steam link: ${game.steamUrl}. Keep it under 150 words.`,
+      }
   }
 }
 
