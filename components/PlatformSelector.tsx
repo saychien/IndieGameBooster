@@ -163,8 +163,9 @@ export default function PlatformSelector({ analysis, onStart }: Props) {
   const [redditLoading, setRedditLoading]    = useState(false)
   const [rnLoading, setRnLoading]            = useState(false)
 
-  const kwEn = analysis.keywords ?? []
-  const kwCn = analysis.chineseKeywords ?? []
+  const mode = analysis.activeKeywordMode ?? 'game'
+  const kwEn = mode === 'vibe' ? (analysis.vibeKeywords ?? []) : (analysis.keywords ?? [])
+  const kwCn = mode === 'vibe' ? (analysis.chineseVibeKeywords ?? []) : (analysis.chineseKeywords ?? [])
 
   async function run(platforms: SelectablePlatform[], setLoading: (v: boolean) => void) {
     setLoading(true)
@@ -239,7 +240,7 @@ export default function PlatformSelector({ analysis, onStart }: Props) {
           <FixedCard emoji="✿" label="RedNote" region="CN" keywords={kwCn} note="Generates a post directly — no channel search" />
           <ActionButton
             label="Generate Post →"
-            onClick={() => run(['xiaohongshu'], setRnLoading)
+            onClick={() => run(['xiaohongshu'], setRnLoading)}
             loading={rnLoading}
             disabled={false}
           />

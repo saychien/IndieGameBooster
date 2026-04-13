@@ -10,11 +10,20 @@ export interface GameData {
   steamUrl: string
 }
 
+export interface SimilarGame {
+  name: string
+  steamAppId?: string
+}
+
 export interface AnalysisReport {
   audienceProfile: string
-  keywords: string[]
-  chineseKeywords: string[]
+  keywords: string[]              // game-specific search terms (English)
+  chineseKeywords: string[]       // game-specific search terms (Chinese)
+  vibeKeywords: string[]          // mood/aesthetic terms — non-game content (English)
+  chineseVibeKeywords: string[]   // mood/aesthetic terms — non-game content (Chinese)
   whyTheyWillLoveIt: string
+  similarGames: SimilarGame[]
+  activeKeywordMode: 'game' | 'vibe'
 }
 
 export interface ImprovementTip {
