@@ -30,6 +30,7 @@ export interface KOL {
 
 interface DiscoveryRequest {
   audienceProfile: string
+  chineseKeywords?: string[]
   platforms: string[]
   gameData?: GameData
 }
@@ -140,7 +141,7 @@ Channels: ${JSON.stringify(compressed)}`
 
 export async function POST(req: NextRequest) {
   const body: DiscoveryRequest = await req.json()
-  const { audienceProfile, platforms } = body
+  const { audienceProfile, chineseKeywords, platforms } = body
 
   if (!audienceProfile || !platforms?.length) {
     return NextResponse.json({ error: 'audienceProfile and platforms required' }, { status: 400 })
@@ -153,10 +154,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(empty)
   }
 
-  // Step A: embed the audience profile
-  let queryVector: number[]
+  const CN_PLATFORMS = new Set(['bilibili', 'xiaohongshu'])
+
+  // Step A: embed query strings — one for global platforms, one for CN platforms
+  const cnQuery = chineseKeywords?.length
+    ? chineseKeywords.join(' ')
+    : audienceProfile
+
+  let globalVector: number[]
+  let cnVector: number[]
   try {
-    queryVector = await embedText(audienceProfile)
+    ;[globalVector, cnVector] = await Promise.all([
+      embedText(audienceProfile),
+      embedText(cnQuery),
+    ])
   } catch (e) {
     return NextResponse.json(
       { error: `Embedding failed: ${(e as Error).message}` },
@@ -168,6 +179,7 @@ export async function POST(req: NextRequest) {
 
   await Promise.all(
     platforms.map(async (platform) => {
+      const queryVector = CN_PLATFORMS.has(platform) ? cnVector : globalVector
       try {
         // Step B: vector search
         const rows = await vectorSearch(platform, queryVector)

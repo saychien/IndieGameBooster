@@ -18,6 +18,7 @@ export async function callClaude(prompt: string, maxTokens = 800): Promise<strin
   const msg = await anthropic.messages.create({
     model: MODEL,
     max_tokens: maxTokens,
+    temperature: 0,
     messages: [{ role: 'user', content: prompt }],
   })
   const block = msg.content[0]
@@ -32,6 +33,7 @@ export async function streamClaude(
   const stream = await anthropic.messages.stream({
     model: MODEL,
     max_tokens: maxTokens,
+    temperature: 0,
     messages: [{ role: 'user', content: prompt }],
   })
   for await (const chunk of stream) {

@@ -14,7 +14,7 @@ const PLATFORM_META: Record<ChannelPlatform, { label: string; color: string; bg:
   gaming_media:    { label: 'Gaming Media', color: '#D97706', bg: 'rgba(217,119,6,0.08)' },
   reddit:          { label: 'Reddit',       color: '#EA580C', bg: 'rgba(234,88,12,0.08)' },
   bilibili:        { label: 'Bilibili',     color: '#2563EB', bg: 'rgba(37,99,235,0.08)' },
-  xiaohongshu:     { label: '小红书',        color: '#DC2626', bg: 'rgba(220,38,38,0.08)' },
+  xiaohongshu:     { label: 'RedNote',        color: '#DC2626', bg: 'rgba(220,38,38,0.08)' },
 }
 
 function fmt(n: number) {

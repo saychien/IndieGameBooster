@@ -12,12 +12,8 @@ export interface GameData {
 
 export interface AnalysisReport {
   audienceProfile: string
-  coreGenreTags: string[]
-  youtubeKeywords: string[]
-  redditKeywords: string[]
-  bilibiliKeywords: string[]
-  xiaohongshuKeywords: string[]
-  gamingMediaAngles: string[]
+  keywords: string[]
+  chineseKeywords: string[]
   whyTheyWillLoveIt: string
 }
 

@@ -7,17 +7,15 @@ export async function POST(req: NextRequest) {
 
   const analysisPrompt = `You are a senior indie game publishing consultant.
 
-Analyze this game and return ONLY a valid JSON object, no markdown, no explanation:
-{
-  "audienceProfile": "2-3 sentence description of the ideal player persona",
-  "coreGenreTags": ["tag1", "tag2", "tag3"],
-  "youtubeKeywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
-  "redditKeywords": ["subreddit1", "subreddit2", "subreddit3"],
-  "bilibiliKeywords": ["中文关键词1", "中文关键词2", "中文关键词3"],
-  "xiaohongshuKeywords": ["中文关键词1", "中文关键词2", "中文关键词3"],
-  "gamingMediaAngles": ["angle1", "angle2", "angle3"],
-  "whyTheyWillLoveIt": "One sentence emotional hook"
-}
+Analyze this game and return ONLY a set of 5 to 7 tags that you deem best descibe the game. 
+Tags could be of various nature. Examples including Genres, with particular attention to the most specific Genre or Sub-Genre
+Visual properties, such as Dimensions: 2D, 2.5D, 3D Camera Perspective: Third-Person, First-Person, Top-Down, Isometric, Side-Scroller, etc.
+Visual Style: Pixel Graphics, Realistic, Abstract, Anime, Cute, Stylized, Minimalist, etc.
+Themes & Moods, such as Theme: Sci-Fi, Fantasy, Space, Zombies, Vampires, etc.
+Mood: Relaxing, Funny, Atmospheric, etc. Features, such as Gameplay mechanics like Choices Matter, Resource Management, Trading, etc.
+Design ingredients like Physics, Procedural Generation, etc.
+Player activities such as Sailing, Mining, Hacking, etc. Note that these tags don't have priority and you
+don't have to add a tag from each categories necessarily. Return the Tags as a valid JSON object.
 
 Game name: ${game.name}
 Description: ${game.description}

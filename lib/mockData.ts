@@ -15,12 +15,8 @@ export const MOCK_GAMES: Record<string, { game: GameData; analysis: AnalysisRepo
     },
     analysis: {
       audienceProfile: 'Core gamers aged 18–34 who thrive on punishing-but-fair challenges and love getting lost in hand-crafted, atmospheric worlds. They\'ve played Dark Souls and want that same feeling in a 2D format. They share speedruns, fan art, and hidden-lore discussions on Reddit and Discord.',
-      coreGenreTags: ['Metroidvania', 'Dark Fantasy', 'Precision Platformer'],
-      youtubeKeywords: ['metroidvania', 'hollow knight', 'indie platformer', 'soulslike 2d', 'difficult platformer'],
-      redditKeywords: ['r/metroidvania', 'r/gaming', 'r/indiegaming'],
-      bilibiliKeywords: ['空洞骑士', '银河恶魔城', '独立游戏'],
-      xiaohongshuKeywords: ['空洞骑士', '独立游戏推荐', '银河恶魔城'],
-      gamingMediaAngles: ['challenging', 'atmospheric', 'metroidvania revival', 'hand-drawn art'],
+      keywords: ['metroidvania', 'hollow knight', 'soulslike 2d', 'indie platformer', 'dark fantasy', 'atmospheric platformer'],
+      chineseKeywords: ['银河恶魔城', '空洞骑士', '类魂2D游戏', '独立平台游戏', '暗黑奇幻', '大气平台游戏'],
       whyTheyWillLoveIt: 'The same dopamine hit as defeating a Soulsborne boss, in an artistically stunning underground world that rewards curiosity.',
     },
     tips: [
@@ -73,12 +69,8 @@ export const MOCK_GAMES: Record<string, { game: GameData; analysis: AnalysisRepo
     },
     analysis: {
       audienceProfile: 'Casual and mid-core players aged 16–40, leaning female, who want a relaxing escape from daily stress. They watch cozy gaming streams on Twitch, follow cottagecore aesthetics on TikTok and Xiaohongshu, and share farm layout screenshots in Discord servers.',
-      coreGenreTags: ['Cozy Farming', 'Life Sim', 'Pixel Art'],
-      youtubeKeywords: ['cozy game', 'farming sim', 'stardew valley', 'relaxing game', 'life simulation'],
-      redditKeywords: ['r/StardewValley', 'r/cozygamers', 'r/indiegaming'],
-      bilibiliKeywords: ['星露谷物语', '农场游戏', '治愈系游戏'],
-      xiaohongshuKeywords: ['星露谷', '治愈游戏', '农场模拟游戏'],
-      gamingMediaAngles: ['cozy', 'stress-relief', 'one-dev success story', 'multiplayer update'],
+      keywords: ['cozy game', 'farming sim', 'stardew valley', 'relaxing game', 'life simulation', 'pixel art rpg'],
+      chineseKeywords: ['治愈系游戏', '农场模拟', '星露谷物语', '放松游戏', '生活模拟', '像素RPG'],
       whyTheyWillLoveIt: 'A sun-drenched digital escape where every day ends with something to look forward to — no pressure, just peace.',
     },
     tips: [

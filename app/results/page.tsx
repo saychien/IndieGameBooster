@@ -59,6 +59,22 @@ function ResultsContent() {
   const [outreach, setOutreach] = useState<OutreachContent[]>([])
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({})
 
+  async function handleKeywordAdd(kw: string) {
+    try {
+      const res = await fetch('/api/translate-keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keywords: [kw] }),
+      })
+      const data = await res.json()
+      if (data.chineseKeywords?.[0]) {
+        setAnalysis(prev => prev ? { ...prev, chineseKeywords: [...prev.chineseKeywords, data.chineseKeywords[0]] } : prev)
+      }
+    } catch {
+      // silently ignore — stale Chinese keywords are non-critical
+    }
+  }
+
   useEffect(() => {
     if (demoKey && MOCK_GAMES[demoKey]) {
       const mock = MOCK_GAMES[demoKey]
@@ -115,7 +131,7 @@ function ResultsContent() {
       const res = await fetch('/api/discovery', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audienceProfile: analysis.audienceProfile, platforms, gameData: game }),
+        body: JSON.stringify({ audienceProfile: analysis.audienceProfile, chineseKeywords: analysis.chineseKeywords, platforms, gameData: game }),
       })
       const data: Record<string, KOL[]> = await res.json()
 
@@ -224,12 +240,12 @@ function ResultsContent() {
 
         {/* Section 2: Analysis */}
         <div style={{ background: C.bgSurface, border: `1px solid ${C.border}`, borderRadius: 14, padding: '1.5rem', marginBottom: '1.25rem' }}>
-          <SectionHeader step={2} title="Audience Analysis & Keywords" />
+          <SectionHeader step={2} title="Game Keywords" />
           {stage === 'analysis' && <><Skeleton h={90} /><Skeleton h={120} /></>}
           {errors.analysis && <ErrorRow msg={`Analysis: ${errors.analysis}`} onRetry={() => game && fetchAnalysis(game)} />}
           {showAnalysis && (
             <>
-              <AnalysisEditor analysis={analysis!} onChange={setAnalysis} />
+              <AnalysisEditor analysis={analysis!} onChange={setAnalysis} onKeywordAdd={handleKeywordAdd} />
               {game && <div style={{ marginTop: '1.25rem' }}><SteamTipsPanel game={game} /></div>}
             </>
           )}

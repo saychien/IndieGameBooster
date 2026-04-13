@@ -19,11 +19,11 @@ interface PlatformConfig {
 }
 
 const PLATFORMS: PlatformConfig[] = [
-  { id: 'youtube',      label: 'YouTube',      region: 'Global',  emoji: '▶',  getKeywords: a => a.youtubeKeywords },
-  { id: 'reddit',       label: 'Reddit',       region: 'Global',  emoji: '◈',  getKeywords: a => a.redditKeywords },
-  { id: 'bilibili',     label: 'Bilibili',     region: 'CN',      emoji: '⊞',  getKeywords: a => a.bilibiliKeywords },
-  { id: 'xiaohongshu',  label: '小红书',        region: 'CN',      emoji: '✿',  getKeywords: a => a.xiaohongshuKeywords },
-  { id: 'gaming_media', label: 'Gaming Media', region: 'Global',  emoji: '✦',  getKeywords: a => a.gamingMediaAngles },
+  { id: 'youtube',      label: 'YouTube',      region: 'Global',  emoji: '▶',  getKeywords: a => a.keywords },
+  { id: 'reddit',       label: 'Reddit',       region: 'Global',  emoji: '◈',  getKeywords: a => a.keywords },
+  { id: 'bilibili',     label: 'Bilibili',     region: 'CN',      emoji: '⊞',  getKeywords: a => a.chineseKeywords },
+  { id: 'xiaohongshu',  label: '小红书',        region: 'CN',      emoji: '✿',  getKeywords: a => a.chineseKeywords },
+  { id: 'gaming_media', label: 'Gaming Media', region: 'Global',  emoji: '✦',  getKeywords: a => a.keywords },
 ]
 
 interface Props {
@@ -54,7 +54,7 @@ export default function PlatformSelector({ analysis, onStart, loading }: Props) 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}>
         {PLATFORMS.map(p => {
           const active = selected.has(p.id)
-          const keywords = p.getKeywords(analysis).slice(0, 3)
+          const keywords = p.getKeywords(analysis)
           return (
             <div
               key={p.id}

@@ -15,7 +15,7 @@ const FILTERS: { key: ChannelPlatform | 'all'; label: string }[] = [
   { key: 'gaming_media',    label: 'Media' },
   { key: 'reddit',          label: 'Reddit' },
   { key: 'bilibili',        label: 'Bilibili' },
-  { key: 'xiaohongshu',     label: '小红书' },
+  { key: 'xiaohongshu',     label: 'Rednote' },
 ]
 
 function fmt(n: number) {
