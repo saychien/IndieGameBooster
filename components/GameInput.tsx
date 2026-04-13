@@ -42,11 +42,11 @@ export default function GameInput() {
       </div>
 
       <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: 800, color: C.textPrimary, textAlign: 'center', lineHeight: 1.15, marginBottom: '1rem', maxWidth: '640px' }}>
-        We replace a publisher<br />
-        with an <span style={{ color: C.pine700 }}>AI agent.</span>
+        We help indie games<br />
+        with <span style={{ color: C.pine700 }}>promotion strategy.</span>
       </h1>
       <p style={{ color: C.textMuted, textAlign: 'center', fontSize: '1.05rem', marginBottom: '3rem', maxWidth: '460px', lineHeight: 1.6 }}>
-        Paste your Steam URL. We'll profile your audience, find the right KOLs across every platform, and write the outreach for you.
+        Paste your Steam URL. We'll analyze your game, find the right KOLs across every platform, and write the outreach for you.
       </p>
 
       <div style={{ background: C.bgSurface, border: `1px solid ${C.border}`, borderRadius: 16, padding: '2.5rem', width: '100%', maxWidth: 520, boxShadow: '0 2px 16px rgba(45,106,79,0.07)' }}>

@@ -2,8 +2,7 @@
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState, Suspense } from 'react'
 import { GameData, AnalysisReport, Channel, ChannelPlatform, OutreachContent, SelectablePlatform } from '@/lib/types'
-import type { KOL } from '@/app/api/discovery/route'
-import { MOCK_GAMES } from '@/lib/mockData'
+import { MOCK_GAMES, MOCK_DISCOVERY } from '@/lib/mockData'
 import AnalysisEditor from '@/components/AnalysisEditor'
 import SteamTipsPanel from '@/components/SteamTipsPanel'
 import PlatformSelector from '@/components/PlatformSelector'
@@ -123,55 +122,19 @@ function ResultsContent() {
     }
   }
 
-  async function handleStartDiscovery(platforms: SelectablePlatform[]) {
+  async function handleStartDiscovery(platforms: SelectablePlatform[]): Promise<void> {
     if (!analysis || !game) return
-    setStage('crawling')
-    setErrors({})
-    try {
-      const res = await fetch('/api/discovery', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audienceProfile: analysis.audienceProfile, chineseKeywords: analysis.chineseKeywords, platforms, gameData: game }),
-      })
-      const data: Record<string, KOL[]> = await res.json()
+    setErrors(p => { const next = { ...p }; platforms.forEach(pl => delete next[pl]); return next })
 
-      // Map per-platform KOL arrays → flat Channel[]
-      const flat: Channel[] = []
-      const platformChannelMap: Record<string, ChannelPlatform> = {
-        youtube: 'youtube_creator',
-        reddit: 'reddit',
-        bilibili: 'bilibili',
-        xiaohongshu: 'xiaohongshu',
-        gaming_media: 'gaming_media',
-      }
-      for (const [platform, kols] of Object.entries(data)) {
-        for (const kol of kols) {
-          flat.push({
-            id: kol.channelId,
-            platform: (platformChannelMap[platform] ?? 'youtube_creator') as ChannelPlatform,
-            name: kol.channelName,
-            url: kol.channelUrl,
-            followerCount: kol.subscriberCount,
-            followerLabel: platform === 'reddit' ? 'members' : 'subscribers',
-            recentContent: kol.recentTitles,
-            relevanceReason: kol.relevanceReason,
-            influenceWeight: kol.relevanceScore,
-          })
-        }
-      }
-
-      // Show "no data" message per platform if empty
-      const emptyPlatforms = platforms.filter(p => !data[p] || data[p].length === 0)
-      if (emptyPlatforms.length > 0 && flat.length === 0) {
-        setErrors(p => ({ ...p, discovery: `No data in database yet for: ${emptyPlatforms.join(', ')}. Run the crawl script first.` }))
-      }
-
-      setChannels(flat)
-      setStage('discovery')
-    } catch (e) {
-      setErrors(p => ({ ...p, discovery: (e as Error).message }))
-      setStage('ready')
-    }
+    // TODO: replace with real API call once backend is ready
+    await new Promise(r => setTimeout(r, 800))
+    const incoming: Channel[] = platforms.flatMap(p => MOCK_DISCOVERY[p] ?? [])
+    const incomingPlatforms = new Set(incoming.map(c => c.platform))
+    setChannels(prev => [
+      ...prev.filter(c => !incomingPlatforms.has(c.platform)),
+      ...incoming,
+    ])
+    setStage('discovery')
   }
 
   async function generateOutreach() {
@@ -196,10 +159,10 @@ function ResultsContent() {
   }
 
   const selectedChannels = channels.filter(c => selectedIds.includes(c.id))
-  const showDiscovery = stage === 'discovery' || stage === 'outreach' || stage === 'publish'
-  const showOutreach = stage === 'publish' && outreach.length > 0
-  const showPlatformSelector = (stage === 'ready' || stage === 'crawling') && analysis !== null
   const showAnalysis = stage !== 'steam' && stage !== 'analysis' && analysis !== null
+  const showPlatformSelector = showAnalysis
+  const showDiscovery = channels.length > 0 || stage === 'discovery' || stage === 'outreach' || stage === 'publish'
+  const showOutreach = stage === 'publish' && outreach.length > 0
 
   return (
     <div style={{ minHeight: '100vh', background: C.bgPage, paddingBottom: '6rem' }}>
@@ -259,7 +222,6 @@ function ResultsContent() {
             <PlatformSelector
               analysis={analysis!}
               onStart={handleStartDiscovery}
-              loading={stage === 'crawling'}
             />
           </div>
         )}

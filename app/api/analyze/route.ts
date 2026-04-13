@@ -7,15 +7,19 @@ export async function POST(req: NextRequest) {
 
   const analysisPrompt = `You are a senior indie game publishing consultant.
 
-Analyze this game and return ONLY a set of 5 to 7 tags that you deem best descibe the game. 
-Tags could be of various nature. Examples including Genres, with particular attention to the most specific Genre or Sub-Genre
-Visual properties, such as Dimensions: 2D, 2.5D, 3D Camera Perspective: Third-Person, First-Person, Top-Down, Isometric, Side-Scroller, etc.
-Visual Style: Pixel Graphics, Realistic, Abstract, Anime, Cute, Stylized, Minimalist, etc.
-Themes & Moods, such as Theme: Sci-Fi, Fantasy, Space, Zombies, Vampires, etc.
-Mood: Relaxing, Funny, Atmospheric, etc. Features, such as Gameplay mechanics like Choices Matter, Resource Management, Trading, etc.
-Design ingredients like Physics, Procedural Generation, etc.
-Player activities such as Sailing, Mining, Hacking, etc. Note that these tags don't have priority and you
-don't have to add a tag from each categories necessarily. Return the Tags as a valid JSON object.
+Analyze this game and return ONLY a JSON object, no markdown:
+{
+  "audienceProfile": "2-3 sentence description of the ideal player",
+  "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
+  "chineseKeywords": ["中文关键词1", "中文关键词2", "中文关键词3", "中文关键词4", "中文关键词5"],
+  "whyTheyWillLoveIt": "One sentence on the emotional hook"
+}
+
+Rules:
+- keywords: 5 English search terms for YouTube, Reddit, and gaming media discovery
+- chineseKeywords: 5 Mandarin Chinese terms for Bilibili and Xiaohongshu discovery
+- audienceProfile: who plays this, their habits, where they hang out online
+- whyTheyWillLoveIt: the core emotional reason this game resonates
 
 Game name: ${game.name}
 Description: ${game.description}

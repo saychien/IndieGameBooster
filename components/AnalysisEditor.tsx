@@ -22,7 +22,7 @@ export default function AnalysisEditor({ analysis, onChange, onKeywordAdd }: Pro
   }
 
   function handleAdd(kw: string) {
-    set('keywords', [...analysis.keywords, kw])
+    set('keywords', [...(analysis.keywords ?? []), kw])
     onKeywordAdd?.(kw)
   }
 
@@ -35,13 +35,13 @@ export default function AnalysisEditor({ analysis, onChange, onKeywordAdd }: Pro
         </span>
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem' }}>
-        {analysis.keywords.map((t, i) => (
+        {(analysis.keywords ?? []).map((t, i) => (
           <span
             key={i}
             onClick={() => onChange({
               ...analysis,
-              keywords: analysis.keywords.filter((_, j) => j !== i),
-              chineseKeywords: analysis.chineseKeywords.filter((_, j) => j !== i),
+              keywords: (analysis.keywords ?? []).filter((_, j) => j !== i),
+              chineseKeywords: (analysis.chineseKeywords ?? []).filter((_, j) => j !== i),
             })}
             title="Click to remove"
             style={{

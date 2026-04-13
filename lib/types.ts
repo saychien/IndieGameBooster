@@ -44,7 +44,7 @@ export interface Channel {
   influenceWeight?: number       // Claude relevanceScore 0–100
 }
 
-export type SelectablePlatform = 'youtube' | 'reddit' | 'bilibili' | 'xiaohongshu' | 'gaming_media'
+export type SelectablePlatform = 'youtube' | 'reddit' | 'bilibili' | 'xiaohongshu'
 
 export type OutreachType =
   | 'press_kit'         // game media

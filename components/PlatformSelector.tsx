@@ -21,8 +21,8 @@ interface PlatformConfig {
 const PLATFORMS: PlatformConfig[] = [
   { id: 'youtube',      label: 'YouTube',      region: 'Global',  emoji: '▶',  getKeywords: a => a.keywords },
   { id: 'reddit',       label: 'Reddit',       region: 'Global',  emoji: '◈',  getKeywords: a => a.keywords },
-  { id: 'bilibili',     label: 'Bilibili',     region: 'CN',      emoji: '⊞',  getKeywords: a => a.chineseKeywords },
-  { id: 'xiaohongshu',  label: '小红书',        region: 'CN',      emoji: '✿',  getKeywords: a => a.chineseKeywords },
+  { id: 'bilibili',     label: 'Bilibili',     region: 'CN',      emoji: '⊞',  getKeywords: a => a.keywords },
+  { id: 'xiaohongshu',  label: 'RedNote',        region: 'CN',      emoji: '✿',  getKeywords: a => a.keywords },
   { id: 'gaming_media', label: 'Gaming Media', region: 'Global',  emoji: '✦',  getKeywords: a => a.keywords },
 ]
 
