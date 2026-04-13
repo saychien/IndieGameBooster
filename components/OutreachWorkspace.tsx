@@ -40,20 +40,20 @@ export default function OutreachWorkspace({ outreach, channels }: Props) {
 
   return (
     <div>
-      {/* Tabs */}
+      {/* Channel tabs */}
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', borderBottom: `1px solid ${C.border}`, paddingBottom: '1rem', marginBottom: '1.5rem' }}>
         {outreach.map((item, i) => {
           const c = channels.find(x => x.id === item.channelId)
-          const active = i === activeIdx
+          const isActive = i === activeIdx
           return (
             <button
               key={i}
               onClick={() => { setActiveIdx(i); setCopied(false) }}
               style={{
                 padding: '0.45rem 1rem', borderRadius: 8, fontSize: '0.83rem', fontWeight: 600, cursor: 'pointer',
-                background: active ? C.pine100 : 'transparent',
-                color: active ? C.pine700 : C.textMuted,
-                border: `1px solid ${active ? C.pine200 : C.border}`,
+                background: isActive ? C.pine100 : 'transparent',
+                color: isActive ? C.pine700 : C.textMuted,
+                border: `1px solid ${isActive ? C.pine200 : C.border}`,
                 transition: 'all 0.15s',
               }}
             >

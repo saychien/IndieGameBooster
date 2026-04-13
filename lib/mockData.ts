@@ -178,19 +178,34 @@ const REDDIT_CHANNELS: Channel[] = [
 
 const XIAOHONGSHU_CHANNELS: Channel[] = [
   {
-    id: 'xhs_post_target',
+    id: 'xhs_style_casual',
     platform: 'xiaohongshu',
-    name: '小红书 · 游戏分享',
+    name: 'Player Sharing Template',
     url: 'https://xiaohongshu.com',
     followerCount: 0,
-    followerLabel: 'platform',
+    followerLabel: '',
     recentContent: [
-      '图文帖：游戏截图 + 话题标签',
-      '风格贴近平台原生内容',
-      '覆盖#独立游戏 #游戏推荐 等高流量话题',
+      '以普通玩家身份分享游戏发现',
+      '口语化、真实感强，像朋友推荐',
+      '适合触达泛游戏兴趣用户',
     ],
-    relevanceReason: '直接发布图文内容，触达小红书游戏兴趣用户，无需对接创作者。',
-    influenceWeight: 88,
+    relevanceReason: 'Casual player voice — feels like an organic recommendation, not a marketing post.',
+    influenceWeight: 0,
+  },
+  {
+    id: 'xhs_style_dev',
+    platform: 'xiaohongshu',
+    name: 'Developer sharing Template',
+    url: 'https://xiaohongshu.com',
+    followerCount: 0,
+    followerLabel: '',
+    recentContent: [
+      '以开发者身份分享创作故事',
+      '真诚有温度，展现独立开发者精神',
+      '适合建立品牌信任感',
+    ],
+    relevanceReason: 'Developer voice — authentic creator story that resonates with indie game fans.',
+    influenceWeight: 0,
   },
 ]
 

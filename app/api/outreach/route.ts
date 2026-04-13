@@ -2,6 +2,49 @@ import { NextRequest, NextResponse } from 'next/server'
 import { callClaude } from '@/lib/claude'
 import { Channel, GameData, AnalysisReport, OutreachContent, OutreachType } from '@/lib/types'
 
+// ─── Xiaohongshu variant prompts ──────────────────────────────
+
+function xhsPromptCasual(game: GameData, analysis: AnalysisReport): string {
+  return `你是一个热爱独立游戏的普通玩家，刚发现了一款很好玩的游戏，想在小红书上分享给朋友。
+
+写一篇小红书帖子，要求：
+- 语气随意真实，像朋友之间的分享，而不是广告
+- 使用小红书的语言风格（口语化，emoji适度）
+- 用2-3句话描述你玩这款游戏的真实感受和体验
+- 结尾自然带出Steam链接，让朋友也能找到
+- 200字以内
+- 附上3-5个相关话题标签（放在正文结尾）
+
+游戏名称：${game.name}
+游戏介绍：${game.description}
+情感卖点：${analysis.whyTheyWillLoveIt}
+Steam链接：${game.steamUrl}
+
+只输出帖子正文，不要标题。`
+}
+
+function xhsPromptDev(game: GameData, analysis: AnalysisReport): string {
+  return `你是这款独立游戏的开发者，想在小红书上向玩家介绍你自己做的游戏。
+
+写一篇小红书帖子，要求：
+- 以开发者身份真诚介绍游戏，可以分享一句创作初衷或幕后故事（1句）
+- 使用小红书的语言风格（口语化，emoji适度）
+- 用2-3句话描述游戏的核心体验和情感价值
+- 结尾邀请玩家去Steam关注或添加愿望单
+- 200字以内
+- 附上3-5个相关话题标签（放在正文结尾）
+
+游戏名称：${game.name}
+游戏介绍：${game.description}
+目标玩家画像：${analysis.audienceProfile}
+情感卖点：${analysis.whyTheyWillLoveIt}
+Steam链接：${game.steamUrl}
+
+只输出帖子正文，不要标题。`
+}
+
+// ─────────────────────────────────────────────────────────────
+
 function buildPrompt(channel: Channel, game: GameData, analysis: AnalysisReport): { type: OutreachType; prompt: string } {
   switch (channel.platform) {
     case 'gaming_media':
@@ -75,26 +118,8 @@ Output the post body only, no title.`,
       }
 
     case 'xiaohongshu':
-      return {
-        type: 'xiaohongshu_post',
-        prompt: `你是一名独立游戏开发者，正在小红书上发帖介绍自己的游戏。
-
-写一篇小红书帖子，要求：
-- 语气真实，像真实玩家或开发者在分享，而不是广告
-- 使用小红书的语言风格（口语化，emoji适度，有话题标签）
-- 用2-3句话描述游戏的核心体验和情感价值
-- 结尾引导读者去Steam关注或愿望单
-- 200字以内
-- 附上3-5个相关话题标签
-
-游戏名称：${game.name}
-游戏介绍：${game.description}
-玩家画像：${analysis.audienceProfile}
-情感卖点：${analysis.whyTheyWillLoveIt}
-Steam链接：${game.steamUrl}
-
-只输出帖子正文，不要标题。`,
-      }
+      // Handled separately in the route — two variants generated in parallel
+      return { type: 'xiaohongshu_post', prompt: '' }
 
     default:
       return {
@@ -110,6 +135,13 @@ export async function POST(req: NextRequest) {
   try {
     const results: OutreachContent[] = await Promise.all(
       channels.map(async (channel): Promise<OutreachContent> => {
+        if (channel.platform === 'xiaohongshu') {
+          const prompt = channel.id.includes('dev')
+            ? xhsPromptDev(game, analysis)
+            : xhsPromptCasual(game, analysis)
+          const content = await callClaude(prompt, 500)
+          return { channelId: channel.id, type: 'xiaohongshu_post', content }
+        }
         const { type, prompt } = buildPrompt(channel, game, analysis)
         const content = await callClaude(prompt, 500)
         return { channelId: channel.id, type, content }

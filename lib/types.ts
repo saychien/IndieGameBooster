@@ -56,7 +56,7 @@ export interface OutreachContent {
   channelId: string
   type: OutreachType
   content: string
-  attachments?: string[]  // e.g. game keys
+  attachments?: string[]
 }
 
 export type PublishMode = 'hosted' | 'download'

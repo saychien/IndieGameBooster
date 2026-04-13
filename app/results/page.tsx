@@ -243,11 +243,22 @@ function ResultsContent() {
           </div>
         )}
 
-        {/* Section 5: Outreach */}
-        {showOutreach && (
+        {/* Section 5: Outreach — skeleton while generating, real content when done */}
+        {(stage === 'outreach' || showOutreach) && (
           <div style={{ background: C.bgSurface, border: `1px solid ${C.border}`, borderRadius: 14, padding: '1.5rem', marginBottom: '1.25rem' }}>
             <SectionHeader step={5} title="Generated Outreach Content" />
-            <OutreachWorkspace outreach={outreach} channels={selectedChannels} />
+            {stage === 'outreach' ? (
+              <div>
+                <div style={{ color: C.textMuted, fontSize: '0.82rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span className="spinner" style={{ borderColor: C.pine500, borderTopColor: 'transparent' } as React.CSSProperties} />
+                  Writing personalised content for {selectedChannels.length} target{selectedChannels.length !== 1 ? 's' : ''}…
+                </div>
+                <Skeleton h={160} />
+                <Skeleton h={160} />
+              </div>
+            ) : (
+              <OutreachWorkspace outreach={outreach} channels={selectedChannels} />
+            )}
           </div>
         )}
 
